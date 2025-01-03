@@ -1,5 +1,6 @@
 import express from 'express';
-import puppeteer from 'puppeteer';
+import puppeteer from 'puppeteer-core';
+import chromium from "@sparticuz/chromium"
 
 const app = express();
 
@@ -10,12 +11,25 @@ app.use(express.urlencoded({ extended: true }));
 
 app.get('/test-adbutler', async (req, res) => {
 
-    const browser = await puppeteer.launch();
+    console.log("test-adbutler", await chromium.executablePath());
+    const browser = await puppeteer.launch({
+        executablePath: await chromium.executablePath(),
+        headless: true,
+        args: [
+            '--no-sandbox',
+            '--disable-setuid-sandbox',
+            '--disable-dev-shm-usage',
+            '--disable-accelerated-2d-canvas',
+            '--no-zygote',
+            '--single-process', // Recommended for Render
+            '--disable-gpu'
+        ],
+    });
     const page = await browser.newPage();
 
     // Navigate the page to a URL.
     await page.goto('https://dainty-figolla-7c1184.netlify.app/', {
-        waitUntil: "networkidle0"
+        waitUntil: "networkidle0",
     });
 
     // Set screen size.
